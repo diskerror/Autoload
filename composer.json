@@ -1,0 +1,26 @@
+{
+	"name": "diskerror/autoload",
+	"description": "An autoloader using the Composer generated autoload files and the Ds data structures.",
+	"type": "project",
+	"license": "public",
+	"homepage": "https://github.com/diskerror/Autoload",
+	"authors": [
+		{
+			"name": "Reid Woodbury Jr",
+			"email": "reid@rawsound.com",
+			"homepage": "http://www.rawsound.com",
+			"role": "Developer"
+		}
+	],
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"require": {
+		"php": "^7.3"
+	},
+	"suggest": {
+		"ext-ds": "*"
+	},
+	"require-dev": {
+		"php-ds/php-ds": "^1.3"
+	}
+}
