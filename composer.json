@@ -15,9 +15,7 @@
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"require": {
-		"php": "^7.3"
-	},
-	"suggest": {
+		"php": "^7.3",
 		"ext-ds": "*"
 	},
 	"require-dev": {

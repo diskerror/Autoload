@@ -10,13 +10,37 @@ use function explode;
 use function file_exists;
 use function implode;
 
+/**
+ * Scope wrapper for autoload functions.
+ */
 final class Autoloader
 {
+	/**
+	 * @var Map
+	 */
 	private static $root;
+
+	/**
+	 * @var Map
+	 */
 	private static $classmap;
+
+	/**
+	 * @var Map
+	 */
 	private static $namespaces;
+
+	/**
+	 * @var string
+	 */
 	private static $psr4;
 
+	/**
+	 * Initialize.
+	 * Gather Composer generated files.
+	 *
+	 * @return void
+	 */
 	public static function init()
 	{
 		self::$root = (basename('../..') === 'vendor') ? '../..' : 'vendor';
@@ -26,28 +50,51 @@ final class Autoloader
 		self::$psr4       = new Map(require self::$root . '/composer/autoload_psr4.php');
 	}
 
-	public static function loader($class)
+	/**
+	 * Loader.
+	 * Method to be registered with autoloader.
+	 *
+	 * @param string $class
+	 *
+	 * @return bool
+	 */
+	public static function load(string $class)
 	{
+		//	Classes mapped directly to files.
 		if (self::$classmap->hasKey($class)) {
 			require self::$classmap->offsetGet($class);
 			return true;
 		}
 
-		if (self::$namespaces->hasKey($class)) {
-			require self::$namespaces->offsetGet($class);
-			return true;
+		$classV     = new Vector(explode('\\', $class));
+		$classDepth = $classV->count();
+
+		//	TODO: Need sample data to test.
+		$requestedClass = '';
+		for ($cd = 0; $cd < $classDepth; ++$cd) {
+			$requestedClass .= $classV->get($cd) . '\\';
+			if (self::$namespaces->hasKey($requestedClass)) {
+				$workingClassFile =
+					self::$namespaces->get($requestedClass) . '/' .
+					implode('/', $classV->slice($cd + 1)->toArray()) . '.php';
+
+				if (file_exists($workingClassFile)) {
+					require $workingClassFile;
+					return true;
+				}
+			}
 		}
 
-		$classV         = new Vector(explode('\\', $class));
 		$requestedClass = '';
-		for ($p = 0; $p < $classV->count(); ++$p) {
-			$requestedClass .= $classV->get($p) . '\\';
+		for ($cd = 0; $cd < $classDepth; ++$cd) {
+			$requestedClass .= $classV->get($cd) . '\\';
 			if (self::$psr4->hasKey($requestedClass)) {
 				$workingClassPaths = self::$psr4->get($requestedClass);
-				for ($wc = 0; $wc < count($workingClassPaths); ++$wc) {
+				$pathCount         = count($workingClassPaths);
+				for ($wc = 0; $wc < $pathCount; ++$wc) {
 					$workingClassFile =
-						self::$psr4->get($requestedClass)[$wc] . '/' .
-						implode('/', $classV->slice($p + 1)->toArray()) . '.php';
+						$workingClassPaths[$wc] . '/' .
+						implode('/', $classV->slice($cd + 1)->toArray()) . '.php';
 
 					if (file_exists($workingClassFile)) {
 						require $workingClassFile;
@@ -60,6 +107,11 @@ final class Autoloader
 		return false;
 	}
 
+	/**
+	 * Include files.
+	 *
+	 * @return void
+	 */
 	public static function loadFiles()
 	{
 		foreach (require self::$root . '/composer/autoload_files.php' as $file) {

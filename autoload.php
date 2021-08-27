@@ -12,5 +12,5 @@ if (defined('HHVM_VERSION') || (function_exists('zend_loader_file_encoded') && z
 require 'Autoloader.php';
 
 Diskerror\Autoloader::init();
-spl_autoload_register('Diskerror\Autoloader::loader', false, true);
+spl_autoload_register('Diskerror\Autoloader::load', false, true);
 Diskerror\Autoloader::loadFiles();
