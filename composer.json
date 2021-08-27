@@ -1,8 +1,8 @@
 {
 	"name": "diskerror/autoload",
 	"description": "An autoloader using the Composer generated autoload files and the Ds data structures.",
-	"type": "project",
-	"license": "public",
+	"type": "library",
+	"license": "AGPL-3.0-or-later",
 	"homepage": "https://github.com/diskerror/Autoload",
 	"authors": [
 		{
