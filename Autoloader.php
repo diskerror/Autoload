@@ -4,7 +4,6 @@ namespace Diskerror;
 
 use Ds\Map;
 use Ds\Vector;
-use function basename;
 use function count;
 use function explode;
 use function file_exists;
@@ -38,9 +37,9 @@ final class Autoloader
 	 */
 	public static function init()
 	{
-		self::$classmap   = new Map(require '../../composer/autoload_classmap.php');
-		self::$namespaces = new Map(require '../../composer/autoload_namespaces.php');
-		self::$psr4       = new Map(require '../../composer/autoload_psr4.php');
+		self::$classmap   = new Map(require __DIR__ . '/../../composer/autoload_classmap.php');
+		self::$namespaces = new Map(require __DIR__ . '/../../composer/autoload_namespaces.php');
+		self::$psr4       = new Map(require __DIR__ . '/../../composer/autoload_psr4.php');
 	}
 
 	/**
@@ -107,7 +106,7 @@ final class Autoloader
 	 */
 	public static function loadFiles()
 	{
-		foreach (require  '../../composer/autoload_files.php' as $file) {
+		foreach (require __DIR__ . '/../../composer/autoload_files.php' as $file) {
 			require_once $file;
 		}
 	}
