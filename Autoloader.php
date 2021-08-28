@@ -65,44 +65,45 @@ final class Autoloader
 	{
 		//	Classes mapped directly to files.
 		if (self::$classmap->hasKey($class)) {
-			require self::$classmap->offsetGet($class);
-			return true;
-		}
-
-		$classA     = explode('\\', $class);
-		$classDepth = count($classA);
-
-		//	TODO: Need sample data to test.
-		$requestedClass = '';
-		for ($cd = 0; $cd < $classDepth; ++$cd) {
-			$requestedClass .= $classA[$cd] . '\\';
-			if (self::$namespaces->hasKey($requestedClass)) {
-				$workingClassFile =
-					self::$namespaces->get($requestedClass) . '/' .
-					implode('/', array_slice($classA, $cd + 1)) . '.php';
-
-				if (file_exists($workingClassFile)) {
-					require $workingClassFile;
-					return true;
-				}
+			$classFile = self::$classmap->get($class);
+			if (file_exists($classFile)) {
+				require $classFile;
+				return true;
 			}
 		}
 
+		$classArr   = explode('\\', $class);
+		$classDepth = count($classArr);
+
 		$requestedClass = '';
 		for ($cd = 0; $cd < $classDepth; ++$cd) {
-			$requestedClass .= $classA[$cd] . '\\';
+			$requestedClass .= $classArr[$cd] . '\\';
+
+			//	PSR-4
 			if (self::$psr4->hasKey($requestedClass)) {
 				$workingClassPaths = self::$psr4->get($requestedClass);
 				$pathCount         = count($workingClassPaths);
 				for ($wc = 0; $wc < $pathCount; ++$wc) {
 					$workingClassFile =
 						$workingClassPaths[$wc] . '/' .
-						implode('/', array_slice($classA, $cd + 1)) . '.php';
+						implode('/', array_slice($classArr, $cd + 1)) . '.php';
 
 					if (file_exists($workingClassFile)) {
 						require $workingClassFile;
 						return true;
 					}
+				}
+			}
+
+			//	Namespaces. TODO: Need sample data to test.
+			if (self::$namespaces->hasKey($requestedClass)) {
+				$workingClassFile =
+					self::$namespaces->get($requestedClass) . '/' .
+					implode('/', array_slice($classArr, $cd + 1)) . '.php';
+
+				if (file_exists($workingClassFile)) {
+					require $workingClassFile;
+					return true;
 				}
 			}
 		}
@@ -118,7 +119,7 @@ final class Autoloader
 	public static function loadFiles()
 	{
 		foreach (self::$files as $file) {
-			require_once $file;
+			require $file;
 		}
 	}
 }
