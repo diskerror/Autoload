@@ -1,7 +1,7 @@
 <?php
 
 if (!extension_loaded('ds') || PHP_VERSION_ID < 70300) {
-	require 'vendor/autoload.php';
+	require __DIR__ . '/../../autoload.php';
 	return;
 }
 
@@ -9,7 +9,7 @@ if (defined('HHVM_VERSION') || (function_exists('zend_loader_file_encoded') && z
 	throw new Exception('Cannot use this autoloader.');
 }
 
-require 'Autoloader.php';
+require __DIR__ . '/Autoloader.php';
 
 Diskerror\Autoloader::init();
 spl_autoload_register('Diskerror\Autoloader::load', false, true);
