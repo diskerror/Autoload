@@ -3,7 +3,7 @@
 namespace Diskerror;
 
 use Ds\Map;
-use Ds\Vector;
+use function array_slice;
 use function count;
 use function explode;
 use function file_exists;
@@ -69,17 +69,17 @@ final class Autoloader
 			return true;
 		}
 
-		$classV     = new Vector(explode('\\', $class));
-		$classDepth = $classV->count();
+		$classA     = explode('\\', $class);
+		$classDepth = count($classA);
 
 		//	TODO: Need sample data to test.
 		$requestedClass = '';
 		for ($cd = 0; $cd < $classDepth; ++$cd) {
-			$requestedClass .= $classV->get($cd) . '\\';
+			$requestedClass .= $classA[$cd] . '\\';
 			if (self::$namespaces->hasKey($requestedClass)) {
 				$workingClassFile =
 					self::$namespaces->get($requestedClass) . '/' .
-					implode('/', $classV->slice($cd + 1)->toArray()) . '.php';
+					implode('/', array_slice($classA, $cd + 1)) . '.php';
 
 				if (file_exists($workingClassFile)) {
 					require $workingClassFile;
@@ -90,14 +90,14 @@ final class Autoloader
 
 		$requestedClass = '';
 		for ($cd = 0; $cd < $classDepth; ++$cd) {
-			$requestedClass .= $classV->get($cd) . '\\';
+			$requestedClass .= $classA[$cd] . '\\';
 			if (self::$psr4->hasKey($requestedClass)) {
 				$workingClassPaths = self::$psr4->get($requestedClass);
 				$pathCount         = count($workingClassPaths);
 				for ($wc = 0; $wc < $pathCount; ++$wc) {
 					$workingClassFile =
 						$workingClassPaths[$wc] . '/' .
-						implode('/', $classV->slice($cd + 1)->toArray()) . '.php';
+						implode('/', array_slice($classA, $cd + 1)) . '.php';
 
 					if (file_exists($workingClassFile)) {
 						require $workingClassFile;
