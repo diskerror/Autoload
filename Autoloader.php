@@ -119,7 +119,7 @@ final class Autoloader
 	public static function loadFiles()
 	{
 		foreach (self::$files as $file) {
-			require $file;
+			require_once $file;
 		}
 	}
 }
