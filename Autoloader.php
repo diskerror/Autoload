@@ -30,7 +30,7 @@ final class Autoloader
 	private static $psr4;
 
 	/**
-	 * @var Vector
+	 * @var array
 	 */
 	private static $files;
 
@@ -50,7 +50,7 @@ final class Autoloader
 		self::$classmap   = file_exists($classmapFile) ? new Map(require $classmapFile) : new Map();
 		self::$namespaces = file_exists($namespacesFile) ? new Map(require $namespacesFile) : new Map();
 		self::$psr4       = file_exists($psr4File) ? new Map(require $psr4File) : new Map();
-		self::$files      = file_exists($filesFile) ? new Vector(require $filesFile) : new Vector();
+		self::$files      = file_exists($filesFile) ? require $filesFile : [];
 	}
 
 	/**
