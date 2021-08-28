@@ -18,11 +18,6 @@ final class Autoloader
 	/**
 	 * @var Map
 	 */
-	private static $root;
-
-	/**
-	 * @var Map
-	 */
 	private static $classmap;
 
 	/**
@@ -43,11 +38,9 @@ final class Autoloader
 	 */
 	public static function init()
 	{
-		self::$root = (basename('../..') === 'vendor') ? '../..' : 'vendor';
-
-		self::$classmap   = new Map(require self::$root . '/composer/autoload_classmap.php');
-		self::$namespaces = new Map(require self::$root . '/composer/autoload_namespaces.php');
-		self::$psr4       = new Map(require self::$root . '/composer/autoload_psr4.php');
+		self::$classmap   = new Map(require '../../composer/autoload_classmap.php');
+		self::$namespaces = new Map(require '../../composer/autoload_namespaces.php');
+		self::$psr4       = new Map(require '../../composer/autoload_psr4.php');
 	}
 
 	/**
@@ -114,7 +107,7 @@ final class Autoloader
 	 */
 	public static function loadFiles()
 	{
-		foreach (require self::$root . '/composer/autoload_files.php' as $file) {
+		foreach (require  '../../composer/autoload_files.php' as $file) {
 			require_once $file;
 		}
 	}
