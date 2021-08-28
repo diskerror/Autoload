@@ -25,9 +25,14 @@ final class Autoloader
 	private static $namespaces;
 
 	/**
-	 * @var string
+	 * @var Map
 	 */
 	private static $psr4;
+
+	/**
+	 * @var Vector
+	 */
+	private static $files;
 
 	/**
 	 * Initialize.
@@ -37,9 +42,15 @@ final class Autoloader
 	 */
 	public static function init()
 	{
-		self::$classmap   = new Map(require __DIR__ . '/../../composer/autoload_classmap.php');
-		self::$namespaces = new Map(require __DIR__ . '/../../composer/autoload_namespaces.php');
-		self::$psr4       = new Map(require __DIR__ . '/../../composer/autoload_psr4.php');
+		$classmapFile   = __DIR__ . '/../../composer/autoload_classmap.php';
+		$namespacesFile = __DIR__ . '/../../composer/autoload_namespaces.php';
+		$psr4File       = __DIR__ . '/../../composer/autoload_psr4.php';
+		$filesFile      = __DIR__ . '/../../composer/autoload_files.php';
+
+		self::$classmap   = file_exists($classmapFile) ? new Map(require $classmapFile) : new Map();
+		self::$namespaces = file_exists($namespacesFile) ? new Map(require $namespacesFile) : new Map();
+		self::$psr4       = file_exists($psr4File) ? new Map(require $psr4File) : new Map();
+		self::$files      = file_exists($filesFile) ? new Vector(require $filesFile) : new Vector();
 	}
 
 	/**
@@ -106,7 +117,7 @@ final class Autoloader
 	 */
 	public static function loadFiles()
 	{
-		foreach (require __DIR__ . '/../../composer/autoload_files.php' as $file) {
+		foreach (self::$files as $file) {
 			require_once $file;
 		}
 	}
