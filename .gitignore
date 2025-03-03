@@ -1,6 +1,6 @@
 /vendor
 ._.*
-composer.lock
-
-.idea
+/composer.lock
+/.idea
 .DS_Store
+/.codebuddy

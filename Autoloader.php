@@ -3,11 +3,6 @@
 namespace Diskerror;
 
 use Ds\Map;
-use function array_slice;
-use function count;
-use function explode;
-use function file_exists;
-use function implode;
 
 /**
  * Scope wrapper for autoload functions.
@@ -17,22 +12,22 @@ final class Autoloader
 	/**
 	 * @var Map
 	 */
-	private static $classmap;
+	private static Map $classmap;
 
 	/**
 	 * @var Map
 	 */
-	private static $namespaces;
+	private static Map $namespaces;
 
 	/**
 	 * @var Map
 	 */
-	private static $psr4;
+	private static Map $psr4;
 
 	/**
 	 * @var array
 	 */
-	private static $files;
+	private static array$files;
 
 	/**
 	 * Initialize.
