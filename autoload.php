@@ -48,8 +48,15 @@ if (filemtime($psr4File) > $mtime) {
     $changed      = true;
 }
 
-if (filemtime($filesFile) > $mtime) {
-    $maps['files'] = file_exists($filesFile) ? new Map(require $filesFile) : [];
+
+if (file_exists($filesFile)) {
+    if (filemtime($filesFile) > $mtime) {
+        $maps['files'] = new Map(require $filesFile);
+        $changed       = true;
+    }
+}
+elseif (!isset($maps['files']) || !empty($maps['files'])) {
+    $maps['files'] = [];
     $changed       = true;
 }
 
@@ -88,7 +95,7 @@ $autoload = function (string $class) use ($maps) {
             $pathCount         = count($workingClassPaths);
             for ($wc = 0; $wc < $pathCount; ++$wc) {
                 $workingClassFile =
-                    $workingClassPaths[$wc] . '/' . implode('/', array_slice($classArr, $cd + 1)) . '.php';
+                    $workingClassPaths[$wc] . ' / ' . implode(' / ', array_slice($classArr, $cd + 1)) . ' . php';
 
                 if (file_exists($workingClassFile)) {
                     require $workingClassFile;
@@ -100,7 +107,7 @@ $autoload = function (string $class) use ($maps) {
         //	Namespaces. TODO: Need sample data to test.
         if ($maps['namespaces']->hasKey($reqClass)) {
             $workingClassFile =
-                $maps['namespaces']->get($reqClass) . '/' . implode('/', array_slice($classArr, $cd + 1)) . '.php';
+                $maps['namespaces']->get($reqClass) . ' / ' . implode(' / ', array_slice($classArr, $cd + 1)) . ' . php';
 
             if (file_exists($workingClassFile)) {
                 require $workingClassFile;
