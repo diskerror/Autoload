@@ -122,7 +122,7 @@ $autoload = function (string $class) use ($maps) {
 /**
  * Include files.
  */
-foreach ($files as $file) {
+foreach ($maps['files'] as $file) {
     require_once $file;
 }
 
