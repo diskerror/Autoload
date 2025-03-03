@@ -9,112 +9,135 @@ use Ds\Map;
  */
 final class Autoloader
 {
-	/**
-	 * @var Map
-	 */
-	private static Map $classmap;
+    /**
+     * @var Map
+     */
+    private static Map $maps;
 
-	/**
-	 * @var Map
-	 */
-	private static Map $namespaces;
+    /**
+     * Initialize.
+     * Gather Composer generated files.
+     *
+     * @return void
+     */
+    public static function init()
+    {
+        $classmapFile   = __DIR__ . '/../../composer/autoload_classmap.php';
+        $namespacesFile = __DIR__ . '/../../composer/autoload_namespaces.php';
+        $psr4File       = __DIR__ . '/../../composer/autoload_psr4.php';
+        $filesFile      = __DIR__ . '/../../composer/autoload_files.php';
+        $autoloadCache  = __DIR__ . '/../../autoload.cache';
 
-	/**
-	 * @var Map
-	 */
-	private static Map $psr4;
+        if (file_exists($autoloadCache)) {
+            self::$maps = unserialize(file_get_contents($autoloadCache));
+            $mtime      = filemtime($autoloadCache);
+        }
+        else {
+            self::$maps = new Map();
+            $mtime      = 0;
+        }
+        $changed = false;
 
-	/**
-	 * @var array
-	 */
-	private static array$files;
+        if (filemtime($classmapFile) > $mtime) {
+            self::$maps['classes'] = file_exists($classmapFile) ? new Map(require $classmapFile) : new Map();
+            $changed               = true;
+        }
 
-	/**
-	 * Initialize.
-	 * Gather Composer generated files.
-	 *
-	 * @return void
-	 */
-	public static function init()
-	{
-		$classmapFile   = __DIR__ . '/../../composer/autoload_classmap.php';
-		$namespacesFile = __DIR__ . '/../../composer/autoload_namespaces.php';
-		$psr4File       = __DIR__ . '/../../composer/autoload_psr4.php';
-		$filesFile      = __DIR__ . '/../../composer/autoload_files.php';
+        if (filemtime($namespacesFile) > $mtime) {
+            self::$maps['namespaces'] = file_exists($namespacesFile) ? new Map(require $namespacesFile) : new Map();
+            $changed                  = true;
+        }
 
-		self::$classmap   = file_exists($classmapFile) ? new Map(require $classmapFile) : new Map();
-		self::$namespaces = file_exists($namespacesFile) ? new Map(require $namespacesFile) : new Map();
-		self::$psr4       = file_exists($psr4File) ? new Map(require $psr4File) : new Map();
-		self::$files      = file_exists($filesFile) ? require $filesFile : [];
-	}
+        if (filemtime($psr4File) > $mtime) {
+            self::$maps['psr4'] = file_exists($psr4File) ? new Map(require $psr4File) : new Map();
+            $changed            = true;
+        }
 
-	/**
-	 * Loader.
-	 * Method to be registered with autoloader.
-	 *
-	 * @param string $class
-	 *
-	 * @return bool
-	 */
-	public static function load(string $class)
-	{
-		//	Classes mapped directly to files.
-		if (self::$classmap->hasKey($class)) {
-			$classFile = self::$classmap->get($class);
-			if (file_exists($classFile)) {
-				require $classFile;
-				return true;
-			}
-		}
 
-		$classArr   = explode('\\', $class);
-		$classDepth = count($classArr);
+        if (file_exists($filesFile)) {
+            if (filemtime($filesFile) > $mtime) {
+                self::$maps['files'] = require $filesFile;
+                $changed             = true;
+            }
+        }
+        elseif (!isset(self::$maps['files']) || !empty(self::$maps['files'])) {
+            self::$maps['files'] = [];
+            $changed             = true;
+        }
 
-		$requestedClass = '';
-		for ($cd = 0; $cd < $classDepth; ++$cd) {
-			$requestedClass .= $classArr[$cd] . '\\';
+        if ($changed) {
+            file_put_contents($autoloadCache, serialize(self::$maps));
+        }
+    }
 
-			//	PSR-4
-			if (self::$psr4->hasKey($requestedClass)) {
-				$workingClassPaths = self::$psr4->get($requestedClass);
-				$pathCount         = count($workingClassPaths);
-				for ($wc = 0; $wc < $pathCount; ++$wc) {
-					$workingClassFile =
-						$workingClassPaths[$wc] . '/' .
-						implode('/', array_slice($classArr, $cd + 1)) . '.php';
+    /**
+     * Loader.
+     * Method to be registered with autoloader.
+     *
+     * @param string $class
+     *
+     * @return bool
+     */
+    public static function load(string $class)
+    {
+        //	Classes mapped directly to files.
+        $classmap = self::$maps['classes'];
+        if ($classmap->hasKey($class)) {
+            $classFile = $classmap->get($class);
+            if (file_exists($classFile)) {
+                require $classFile;
+                return true;
+            }
+        }
 
-					if (file_exists($workingClassFile)) {
-						require $workingClassFile;
-						return true;
-					}
-				}
-			}
+        $classArr   = explode('\\', $class);
+        $classDepth = count($classArr);
 
-			//	Namespaces. TODO: Need sample data to test.
-			if (self::$namespaces->hasKey($requestedClass)) {
-				$workingClassFile =
-					self::$namespaces->get($requestedClass) . '/' .
-					implode('/', array_slice($classArr, $cd + 1)) . '.php';
+        $reqClass   = '';
+        $psr4       = self::$maps['psr4'];
+        $namespaces = self::$maps['namespaces'];
+        for ($cd = 0; $cd < $classDepth; ++$cd) {
+            $reqClass .= $classArr[$cd] . '\\';
 
-				if (file_exists($workingClassFile)) {
-					require $workingClassFile;
-					return true;
-				}
-			}
-		}
+            //	PSR-4
+            if ($psr4->hasKey($reqClass)) {
+                $workingClassPaths = $psr4->get($reqClass);
+                $pathCount         = count($workingClassPaths);
+                for ($wc = 0; $wc < $pathCount; ++$wc) {
+                    $workingClassFile =
+                        $workingClassPaths[$wc] . '/' . implode('/', array_slice($classArr, $cd + 1)) . '.php';
 
-		return false;
-	}
+                    if (file_exists($workingClassFile)) {
+                        require $workingClassFile;
+                        return true;
+                    }
+                }
+            }
 
-	/**
-	 * Include files.
-	 *
-	 * @return void
-	 */
-	public static function loadFiles()
-	{
-		foreach (self::$files as $file) {
-			require_once $file;
-		}
-	}
+            //	Namespaces. TODO: Need sample data to test.
+            if ($namespaces->hasKey($reqClass)) {
+                $workingClassFile =
+                    $namespaces->get($reqClass) . '/' . implode('/', array_slice($classArr, $cd + 1)) . '.php';
+
+                if (file_exists($workingClassFile)) {
+                    require $workingClassFile;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Include files.
+     *
+     * @return void
+     */
+    public static function loadFiles()
+    {
+        foreach (self::$maps['files'] as $file) {
+            require_once $file;
+        }
+    }
 }
