@@ -124,6 +124,13 @@ final class Autoloader
                     return true;
                 }
             }
+
+            //	Classes mapped directly to files from the base directory.
+            $fullPath = __DIR__ . '/../../../' . strtr(substr($reqClass, 0, -1), '\\', '/');
+            if (!is_dir($fullPath) && file_exists($fullPath . '.php')) {
+                require_once $fullPath . '.php';
+                return true;
+            }
         }
 
         return false;
