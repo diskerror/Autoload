@@ -10,6 +10,11 @@ use Ds\Map;
 final class Autoloader
 {
     /**
+     * @var string
+     */
+    private static string $projectRoot;
+
+    /**
      * @var Map
      */
     private static Map $maps;
@@ -22,11 +27,13 @@ final class Autoloader
      */
     public static function init()
     {
-        $classmapFile   = __DIR__ . '/../../composer/autoload_classmap.php';
-        $namespacesFile = __DIR__ . '/../../composer/autoload_namespaces.php';
-        $psr4File       = __DIR__ . '/../../composer/autoload_psr4.php';
-        $filesFile      = __DIR__ . '/../../composer/autoload_files.php';
-        $autoloadCache  = __DIR__ . '/../../autoload.cache';
+        self::$projectRoot = realpath(__DIR__ . '/../../..') . '/';
+
+        $classmapFile   = self::$projectRoot . 'vendor/composer/autoload_classmap.php';
+        $namespacesFile = self::$projectRoot . 'vendor/composer/autoload_namespaces.php';
+        $psr4File       = self::$projectRoot . 'vendor/composer/autoload_psr4.php';
+        $filesFile      = self::$projectRoot . 'vendor/composer/autoload_files.php';
+        $autoloadCache  = self::$projectRoot . 'vendor/autoload.cache';
 
         if (file_exists($autoloadCache)) {
             self::$maps = unserialize(file_get_contents($autoloadCache));
@@ -114,7 +121,6 @@ final class Autoloader
                 }
             }
 
-            //	Namespaces. TODO: Need sample data to test.
             if ($namespaces->hasKey($reqClass)) {
                 $workingClassFile =
                     $namespaces->get($reqClass) . '/' . implode('/', array_slice($classArr, $cd + 1)) . '.php';
@@ -126,7 +132,7 @@ final class Autoloader
             }
 
             //	Classes mapped directly to files from the base directory.
-            $fullPath = __DIR__ . '/../../../' . strtr(substr($reqClass, 0, -1), '\\', '/');
+            $fullPath = self::$projectRoot . strtr(substr($reqClass, 0, -1), '\\', '/');
             if (!is_dir($fullPath) && file_exists($fullPath . '.php')) {
                 require_once $fullPath . '.php';
                 return true;
