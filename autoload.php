@@ -14,6 +14,8 @@ require __DIR__ . '/../../composer/platform_check.php';
 
 require __DIR__ . '/Autoloader.php';
 
+ini_set('memory_limit', -1);
+
 Diskerror\Autoloader::init();
 spl_autoload_register('Diskerror\Autoloader::load', true, true);
 Diskerror\Autoloader::loadFiles();
