@@ -36,8 +36,15 @@ final class Autoloader
         $autoloadCache  = self::$projectRoot . 'vendor/autoload.cache';
 
         if (file_exists($autoloadCache)) {
-            self::$maps = unserialize(file_get_contents($autoloadCache));
-            $mtime      = filemtime($autoloadCache);
+            // Try/catch in case the cache exists but is corrupted.
+            try {
+                self::$maps = unserialize(file_get_contents($autoloadCache));
+                $mtime      = filemtime($autoloadCache);
+            }
+            catch (\Throwable $e) {
+                self::$maps = new Map();
+                $mtime      = 0;
+            }
         }
         else {
             self::$maps = new Map();
