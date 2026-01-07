@@ -16,9 +16,14 @@
   "prefer-stable": true,
   "require": {
     "php": ">=7.4",
-    "ext-ds": "^1.5"
+    "ext-ds": "^1.6"
   },
   "require-dev": {
-    "php-ds/php-ds": "^1.5"
+    "php-ds/php-ds": "^1.7"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Bench\\Classes\\": "tests/benchmark/classes/"
+    }
   }
 }

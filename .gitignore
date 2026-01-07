@@ -4,3 +4,5 @@
 /.idea
 .DS_Store
 /.codebuddy
+/.qodo
+Class[0-9]*.php
